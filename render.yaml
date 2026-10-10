@@ -1,32 +1,47 @@
 # Render blueprint. Connect this repository at render.com and Render will
 # build and deploy it, then give you a URL.
 #
-# The web service is Node. The database is NOT declared here on purpose:
-# Render's free Postgres expires after 30 days, so the database is a Neon
-# instance and DATABASE_URL is set as a secret in the dashboard.
+# The web service is Node. The database is NOT declared here, on purpose.
+# Render's free Postgres expires 30 days after it is created, so the
+# database is a Neon instance and DATABASE_URL is entered in the
+# dashboard. `sync: false` below is what makes Render ask for it.
 #
-# WHAT RENDER DOES EACH TIME:
-#   1. npm ci                 installs exactly what package-lock.json pins
-#   2. npm run build           installs and builds the front end with Parcel
-#   3. npm start               runs the API, which also serves web/dist
+# WHAT RENDER DOES ON EACH DEPLOY
+#   1. npm ci            installs exactly what package-lock.json pins
+#   2. npm run build      builds the front end with Parcel
+#   3. npm start          runs the API, which also serves web/dist
 #
-# A restart or a fresh deploy does not lose data, because the rows live
-# in Neon and not on Render's filesystem.
+# The schema is created by the server itself on startup, before it begins
+# listening. CREATE TABLE IF NOT EXISTS is a no-op when the tables are
+# already there, so this is safe to run on every boot.
+#
+# A restart or a redeploy does not lose data, because the rows live in
+# Neon and not on Render's filesystem. Render's free web services use an
+# ephemeral filesystem, where a local SQLite file would be wiped on
+# every restart.
 
 services:
   - type: web
     name: applytrack
     runtime: node
     plan: free
+
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
+
+    # Deploy only when the GitHub Actions workflow passes. A red test run
+    # does not become a broken public URL.
+    autoDeployTrigger: checksPass
+
     envVars:
-      - key: NODE_VERSION
-        value: "22"
-      # Both of these are set in the dashboard as secret values.
-      # They are deliberately not in this file.
-      # - key: JWT_SECRET
-      #   sync: false
-      # - key: DATABASE_URL
-      #   sync: false
+      # Render asks for these on first deploy. They are never in this
+      # file, because a secret in a blueprint file is a secret in git.
+      - key: JWT_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+
+      # NODE_VERSION is not set here. Render reads .node-version from the
+      # repo root, which pins the deployed runtime to the same major that
+      # the tests run on. A NODE_VERSION env var would override it.

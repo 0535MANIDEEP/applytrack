@@ -85,18 +85,37 @@ Both suites pass. That is the point of keeping both.
 
 ## Deploying
 
-`render.yaml` deploys the app to Render as a Node web service. Set
-`DATABASE_URL` and `JWT_SECRET` as secrets in the dashboard and it is
-live.
+`render.yaml` deploys the app to Render as a Node web service. On first
+deploy Render asks for two values, both of which are secrets and neither
+of which is in the repository:
 
-The database is a Neon instance rather than Render Postgres, because
-Render's free Postgres expires after 30 days.
+- `DATABASE_URL` — a free Postgres from [Neon](https://neon.tech)
+- `JWT_SECRET` — any long random string. Generate one with
+  `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
+
+The Node version is pinned by `.node-version`, and CI runs on the same
+major, so a green test run is evidence about the version that actually
+gets deployed. Render's docs warn that an unbounded range in `engines`
+resolves to whatever Node releases next, so `engines` is bounded too.
+
+`autoDeployTrigger: checksPass` means a red CI run does not become a
+broken public URL.
 
 **Why not SQLite?** It was the first choice, since it needs no setup at
 all. Render's documentation says a free web service has an "ephemeral
 filesystem" and that "local SQLite databases" are lost "every time the
 service redeploys, restarts, or spins down". An application tracker that
 empties itself whenever the server idles is not much use.
+
+**Why not Render Postgres?** Its free tier expires 30 days after
+creation. A resume link that dies next month is worse than no link.
+
+### One thing to know about the free tier
+
+A free Render web service spins down after about 15 minutes of no
+traffic. The first request after that takes roughly half a minute while
+it wakes up, and the page shows a "loading" state while it does. The app
+is not broken, just asleep.
 
 ## How it is put together
 

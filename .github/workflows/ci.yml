@@ -13,9 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 24, matching .node-version. If these ever disagree, CI stops
+      # being evidence about the thing that actually gets deployed.
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       # The repository uses npm workspaces, so this one install covers
