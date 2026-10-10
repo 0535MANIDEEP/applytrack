@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # The repository uses npm workspaces, so this one install covers
+      # the server and the front end together.
+      - name: Install
+        run: npm ci
+
+      # No database service is needed here. The suite sets
+      # DB_DRIVER=memory in test/setup.js, which makes src/db.js load
+      # pg-mem instead of connecting to Postgres. Every query the tests
+      # run is the same SQL the app runs against a real database.
+      - name: Test
+        run: npm test
+
+      - name: Build the front end
+        run: npm run build

@@ -1,0 +1,32 @@
+# Render blueprint. Connect this repository at render.com and Render will
+# build and deploy it, then give you a URL.
+#
+# The web service is Node. The database is NOT declared here on purpose:
+# Render's free Postgres expires after 30 days, so the database is a Neon
+# instance and DATABASE_URL is set as a secret in the dashboard.
+#
+# WHAT RENDER DOES EACH TIME:
+#   1. npm ci                 installs exactly what package-lock.json pins
+#   2. npm run build           installs and builds the front end with Parcel
+#   3. npm start               runs the API, which also serves web/dist
+#
+# A restart or a fresh deploy does not lose data, because the rows live
+# in Neon and not on Render's filesystem.
+
+services:
+  - type: web
+    name: applytrack
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Both of these are set in the dashboard as secret values.
+      # They are deliberately not in this file.
+      # - key: JWT_SECRET
+      #   sync: false
+      # - key: DATABASE_URL
+      #   sync: false

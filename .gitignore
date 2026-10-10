@@ -1,0 +1,20 @@
+node_modules/
+.env
+.env.local
+
+# Databases. Both are local files: applytrack.db is the development one
+# and test.db is created by the test suite. Neither belongs here.
+*.db
+*.db-shm
+*.db-wal
+
+# Built front end and Parcel's cache
+web/dist/
+.parcel-cache/
+web/.parcel-cache/
+
+# Logs
+*.log
+*.err
+
+.DS_Store

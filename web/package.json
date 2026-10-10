@@ -1,0 +1,30 @@
+{
+  "name": "applytrack-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "source": "index.html",
+  "scripts": {
+    "dev": "parcel index.html --port 1234",
+    "build": "rimraf dist && parcel build index.html --dist-dir dist --public-url ./ --no-source-maps"
+  },
+  "targets": {
+    "default": {
+      "distDir": "dist",
+      "publicUrl": "./"
+    }
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "parcel": "^2.16.4",
+    "rimraf": "^6.0.1"
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions"
+  ]
+}
