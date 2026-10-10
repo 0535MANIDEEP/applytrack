@@ -13,7 +13,7 @@
     "dev": "node --env-file-if-exists=.env --watch src/server.js",
     "web": "npm run dev --workspace=web",
     "seed": "node --env-file-if-exists=.env src/seed.js",
-    "test": "node --test --import ./test/setup.js test/*.test.js",
+    "test": "node --test --test-force-exit --import ./test/setup.js test/*.test.js",
     "build": "npm run build --workspace=web",
     "test:postgres": "node test/against-real-postgres.js"
   },

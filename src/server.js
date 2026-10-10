@@ -63,7 +63,11 @@ app.use((err, req, res, next) => {
 // request cannot arrive at a database with no tables in it.
 await migrate();
 
-const server = app.listen(PORT, () => {
+// Exported so the test suite can shut it down. A test process that ends
+// with a listening socket and an open connection pool never exits on
+// its own, and a CI job that never exits is a red build that never
+// arrives.
+export const server = app.listen(PORT, () => {
   console.log(`applytrack listening on http://localhost:${PORT}`);
 });
 

@@ -10,6 +10,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # A hung job is worse than a failed one: it blocks the deploy gate
+    # and nobody looks at it. Ten minutes is far more than a 23 test
+    # suite needs, so hitting it means something is stuck.
+    timeout-minutes: 10
+
     steps:
       - uses: actions/checkout@v4
 

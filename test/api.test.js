@@ -6,14 +6,23 @@
 // framework to install and no extra dependency, so "run the tests" is
 // one command with nothing to configure.
 //
-// The database used here is a separate file from the development one,
-// so running the suite never touches real data. Set up and teardown are
-// in hooks.test.js, which runs before and after this file.
+// The database is pg-mem, an in-memory Postgres, set up by test/setup.js.
+// Nothing is written to disk and there is no database to install.
 
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
-import app from '../src/server.js';
+import app, { server } from '../src/server.js';
+import { close as closeDb } from '../src/db.js';
+
+// Importing the server starts a real listener and opens a real pool.
+// Both are still holding the event loop open when the last test
+// finishes, so without this the process sits there forever instead of
+// exiting. It hangs locally too, just less visibly.
+after(async () => {
+  await new Promise((resolve) => server.close(resolve));
+  await closeDb();
+});
 
 // ---- auth ------------------------------------------------------------
 
