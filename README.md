@@ -61,6 +61,28 @@ instead of connecting to Postgres. pg-mem is an in-memory Postgres, and
 every query the suite runs is the same SQL the app runs against a real
 database.
 
+### Against real Postgres
+
+pg-mem is an emulator, so passing tests against it do not prove the app
+works on the real thing. `test/against-real-postgres.js` checks that it
+does:
+
+```bash
+npm run test:postgres
+```
+
+It creates a throwaway `applytrack_test` database on the local server,
+runs all 23 tests against it, and drops it again. It never touches a
+database that holds anything.
+
+If Postgres is not running locally, override the connection:
+
+```bash
+ADMIN_DATABASE_URL=postgresql://postgres@localhost:5432/postgres npm run test:postgres
+```
+
+Both suites pass. That is the point of keeping both.
+
 ## Deploying
 
 `render.yaml` deploys the app to Render as a Node web service. Set
@@ -138,6 +160,12 @@ Node 20.6, so there is no `dotenv` dependency.
 **npm workspaces.** `web` is a workspace of the root package, so one
 `npm install` covers the server and the front end together and there is
 one `package-lock.json` rather than two that can drift apart.
+
+**The suite runs twice.** `npm test` uses pg-mem so anyone can run it
+with no setup. `npm run test:postgres` runs the identical suite against a
+real Postgres and throws the database away afterwards. An emulator
+passing is weaker evidence than the real database passing, and both are
+one command away.
 
 ### Known limits
 
